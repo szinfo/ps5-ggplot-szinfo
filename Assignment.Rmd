@@ -1,0 +1,16 @@
+---
+title: "Assignment"
+author: "Sam Zinbarg"
+output: html_document
+date: "2/19/2023"
+---
+
+```{r library}
+library(tidyverse)
+library(ggplot2)
+```
+## Load and check data
+
+``` {r read in data}
+
+```
