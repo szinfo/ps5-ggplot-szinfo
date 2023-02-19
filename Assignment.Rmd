@@ -11,6 +11,27 @@ library(ggplot2)
 ```
 ## Load and check data
 
+### Problem 2
 ``` {r read in data}
+gapminder <- read.delim("gapminder.csv.bz2")
+gapminder
 
+nrow(gapminder)
+ncol(gapminder)
+```
+There are 13055 rows of data and 25 colummns
+
+### Problem 3
+``` {r sample data}
+ gapminder %>% 
+  sample_n(5)
+```
+
+## Descriptive statistics
+
+### Problem 1
+``` {r counting countries}
+n_distinct(gapminder$name)
+n_distinct(gapminder$iso3)
+n_distinct(gapminder$iso2)
 ```
