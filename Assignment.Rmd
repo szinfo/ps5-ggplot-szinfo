@@ -171,11 +171,20 @@ gapminder %>%
 ``` {r histograms}
 gapminder %>% 
   filter(!is.na(GDP_PC), time == "1960" | time == "2019") %>% 
-  ggplot(aes(x = GDP_PC), fill = factor(time))+
-  geom_bar(aes(GDP_PC, stat = "identity", position = "dodge"))
+  ggplot(aes(x = GDP_PC, fill = factor(time)))+
+  geom_histogram(position = position_dodge())
 ```
-
-
+### Problem 7
+```{r ranking us in LE both 1960 and 2019}
+gapminder %>% 
+  filter(!is.na(lifeExpectancy), !is.na(name)) %>%
+  filter(time == "1960" | time == "2019") %>%
+  group_by(time) %>% 
+  mutate(rank = rank(desc(lifeExpectancy))) %>% 
+  filter(name == "United States of America") %>% 
+  reframe(name, time, rank)
+```
+### Problem 8
 
 
 
