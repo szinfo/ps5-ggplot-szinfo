@@ -13,7 +13,7 @@ library(ggplot2)
 
 ### Problem 2
 ``` {r read in data}
-gapminder <- read.delim("gapminder.csv.bz2")
+gapminder <- read_delim("gapminder.csv")
 gapminder
 
 nrow(gapminder)
@@ -26,12 +26,106 @@ There are 13055 rows of data and 25 colummns
  gapminder %>% 
   sample_n(5)
 ```
+The data appears to mostly be fine however there is some data that has missing values as there is some columns that have some NAs for some of the values
 
 ## Descriptive statistics
 
 ### Problem 1
 ``` {r counting countries}
-n_distinct(gapminder$name)
-n_distinct(gapminder$iso3)
-n_distinct(gapminder$iso2)
+n_distinct(gapminder$name, na.rm = TRUE)
+n_distinct(gapminder$iso3, na.rm = TRUE)
+n_distinct(gapminder$iso2, na.rm = TRUE)
 ```
+### Problem 2
+```{r names to iso2 and to iso3}
+gapminder %>% 
+  group_by(iso2) %>%
+  filter(is.na(iso2)) %>% 
+  distinct(name)
+
+gapminder %>% 
+  group_by(iso3) %>% 
+  distinct(name)
+```
+### Problem 3
+```{r min and max years}
+gapminder %>% 
+  summarize(min(time, na.rm = TRUE),
+            max(time, na.rm = TRUE))
+```
+
+## CO2 Emissions
+
+### Problem 1
+```{r missing CO2 values}
+gapminder %>% 
+  group_by(time) %>% 
+  filter(is.na(co2) & is.na(co2_PC)) %>% 
+  summarize(count = n()) %>% 
+  arrange(rank(desc(count)))
+```
+The years with the most missing values is 2017, 2018, 2019.
+
+### Problem 2
+```{r plot of C02 overtime in U.S, China, India}
+
+US <- gapminder %>% filter(name == "United States of America")
+China <- gapminder %>% filter(name == "China")
+India <- gapminder %>% filter(name == "India")
+Australia <- gapminder %>%  filter(name == "Australia")
+Kenya <- gapminder %>%  filter(name == "Kenya")
+
+
+ggplot(data = gapminder) + 
+  geom_line(data = US, aes(x = time, y = co2, color = "USA")) +
+  geom_line(data = China, aes(x = time, y = co2, color = "China")) +
+  geom_line(data = India, aes(x = time, y = co2, color = "India")) +
+  geom_line(data = Australia, aes(x = time, y = co2, color = "Australia")) +
+  geom_line(data = Kenya, aes(x = time, y = co2, color = "Kenya")) 
+```
+
+### Problem 3
+``` {r same graph but with co2_PC}
+
+ggplot(data = gapminder) + 
+  geom_line(data = US, aes(x = time, y = co2_PC, color = "USA")) +
+  geom_line(data = China, aes(x = time, y = co2_PC, color = "China")) +
+  geom_line(data = India, aes(x = time, y = co2_PC, color = "India")) +
+  geom_line(data = Australia, aes(x = time, y = co2_PC, color = "Australia")) +
+  geom_line(data = Kenya, aes(x = time, y = co2_PC, color = "Kenya")) 
+```
+
+### Problem 4
+```{r co2_PC for each region}
+gapminder %>% 
+  filter(!is.na(region)) %>% 
+  group_by(region) %>% 
+  summarize(ave_co2_PC = mean(co2_PC, na.rm = TRUE))
+```
+
+### Problem 5
+``` {r barplot for ave co2_PC by region}
+gapminder %>% 
+  filter(!is.na(region), time == "1960" | time == "2016") %>% 
+  group_by(region, time) %>% 
+  summarize(ave_co2_PC = mean(co2_PC, na.rm = TRUE)) %>% 
+  ggplot(aes(region, ave_co2_PC, fill = factor(time))) +
+  geom_bar(positon = "dodge")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
