@@ -60,9 +60,8 @@ gapminder %>%
 ```{r missing CO2 values}
 gapminder %>% 
   group_by(time) %>% 
-  filter(is.na(co2) & is.na(co2_PC)) %>% 
-  summarize(count = n()) %>% 
-  arrange(rank(desc(count)))
+  summarize(na_co2 = sum(is.na(co2)), na_co2_PC = sum(is.na(co2_PC))) %>% 
+  arrange(desc(na_co2), na_co2_PC)
 ```
 The years with the most missing values is 2017, 2018, 2019.
 
@@ -110,17 +109,71 @@ gapminder %>%
   group_by(region, time) %>% 
   summarize(ave_co2_PC = mean(co2_PC, na.rm = TRUE)) %>% 
   ggplot(aes(region, ave_co2_PC, fill = factor(time))) +
-  geom_bar(positon = "dodge")
+  geom_bar(stat = "identity", position = position_dodge())
+```
+
+### Problem 6
+```{r comparing countries ave_co2 in 2019 by continent}
+gapminder %>% 
+  filter(!is.na(region), time == "2016", !is.na(co2_PC)) %>% 
+  group_by(region) %>% 
+  reframe(region, name, co2_PC) %>% 
+  filter(rank(co2_PC) <= 3 | rank(desc(co2_PC)) <= 3) %>%
+  arrange(co2_PC)
+  
 ```
 
 
+## GDP per captia
+
+###Problem 1
+``` {r scatterplot}
+GDP_PC_lifeExpectancy_1960 <- gapminder %>% 
+  filter(!is.na(GDP_PC), !is.na(lifeExpectancy), time =="1960", !is.na(region)) %>% 
+  ggplot(aes(x = GDP_PC, y = lifeExpectancy)) +
+  geom_point(aes(size = totalPopulation, color = region))
+GDP_PC_lifeExpectancy_1960
+```
+
+### Problem 2
+``` {r same scatterplot using data from 2019}
+GDP_PC_lifeExpectancy_2019 <- gapminder %>% 
+  filter(!is.na(GDP_PC), !is.na(lifeExpectancy), time =="2019", !is.na(region)) %>% 
+  ggplot(aes(x = GDP_PC, y = lifeExpectancy)) +
+  geom_point(aes(size = totalPopulation, color = region))
+GDP_PC_lifeExpectancy_2019
+```
+
+### Problem 3
 
 
+### Problem 4
+``` {r average life expectancy by region}
+gapminder %>% 
+  filter(!is.na(region), !is.na(lifeExpectancy)) %>%
+  filter(time == "1960" | time == "2019") %>% 
+  group_by(region, time) %>%
+  summarize(ave_lifeExpectancy = mean(lifeExpectancy))
+```
 
+### Problem 5
+``` {r comparing LE growth from 1960 to 2019}
+gapminder %>% 
+  filter(!is.na(region), !is.na(lifeExpectancy)) %>%
+  filter(time == "1960" | time == "2019") %>% 
+  group_by(region, time) %>%
+  summarize(ave_lifeExpectancy = mean(lifeExpectancy)) %>% 
+  mutate(growth = ave_lifeExpectancy-lag(ave_lifeExpectancy)) %>% 
+  arrange(-growth)
+```
 
-
-
-
+### Problem 6
+``` {r histograms}
+gapminder %>% 
+  filter(!is.na(GDP_PC), time == "1960" | time == "2019") %>% 
+  ggplot(aes(x = GDP_PC), fill = factor(time))+
+  geom_bar(aes(GDP_PC, stat = "identity", position = "dodge"))
+```
 
 
 
