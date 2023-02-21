@@ -19,7 +19,6 @@ gapminder
 nrow(gapminder)
 ncol(gapminder)
 ```
-There are 13055 rows of data and 25 colummns
 
 ### Problem 3
 ``` {r sample data}
@@ -175,8 +174,9 @@ gapminder %>%
   filter(time == "1960" | time == "2019") %>% 
   group_by(region, time) %>%
   summarize(ave_lifeExpectancy = mean(lifeExpectancy)) %>% 
-  mutate(growth_in_lE = ave_lifeExpectancy-lag(ave_lifeExpectancy)) %>% 
+  mutate(growth_in_lE = ave_lifeExpectancy-lag(ave_lifeExpectancy)) %>%
   arrange(-growth_in_lE)
+
 ```
 
 Here we see that over time countries from Asia and Africa, experienced the greatest growth in life expectancy from 1960 to 2019. Countries from Europe experienced the lowest change in life expectancy over time with the Americas and Oceania region experiencing a healthy increase in life expectancy. 
