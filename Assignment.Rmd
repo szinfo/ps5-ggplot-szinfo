@@ -39,13 +39,14 @@ n_distinct(gapminder$iso2, na.rm = TRUE)
 ### Problem 2
 ```{r names to iso2 and to iso3}
 gapminder %>% 
-  group_by(iso2) %>%
   filter(is.na(iso2)) %>% 
-  distinct(name)
+  group_by(name) %>% 
+  distinct(iso2)
 
 gapminder %>% 
-  group_by(iso3) %>% 
-  distinct(name)
+  filter(is.na(name)) %>% 
+  group_by(name) %>% 
+  distinct(iso3)
 ```
 ### Problem 3
 ```{r min and max years}
@@ -60,7 +61,8 @@ gapminder %>%
 ```{r missing CO2 values}
 gapminder %>% 
   group_by(time) %>% 
-  summarize(na_co2 = sum(is.na(co2)), na_co2_PC = sum(is.na(co2_PC))) %>% 
+  summarize(na_co2 = sum(is.na(co2)), 
+            na_co2_PC = sum(is.na(co2_PC))) %>% 
   arrange(desc(na_co2), na_co2_PC)
 ```
 The years with the most missing values is 2017, 2018, 2019.
@@ -83,6 +85,9 @@ ggplot(data = gapminder) +
   geom_line(data = Kenya, aes(x = time, y = co2, color = "Kenya")) 
 ```
 
+it seems like over time China has seen the biggest increase in CO2 emissions between 1960-2019, with the United States staying relatively steady over time, albeit comparatively way higher than the rest of the countries. India has for much of the past 60 years remained low in their CO2 emissions yet in the past 10-20 years theres a pretty steep increase. Both Kenya and Australia have maintained extremely low CO2 emissions compared to the rest of the countries, with Kenya have the lowest overall over time then Australia following close behind.  
+
+
 ### Problem 3
 ``` {r same graph but with co2_PC}
 
@@ -94,13 +99,16 @@ ggplot(data = gapminder) +
   geom_line(data = Kenya, aes(x = time, y = co2_PC, color = "Kenya")) 
 ```
 
+CO2 emissions per capita paint a different picture however between these 5 countries as we see countries like the US and Australia being the highest in per capita emissions while China, India and Kenya make up the bottom 3 in that order. We see that the US has overtime lowered its emissions per capita while Australia has steadily been increasing. China in the 1960s-1990s remained relatively low but started experiencing a very steep increase in CO2 emissions per capita. Both Kenya and India show that they kept low emissions per capita with India starting to show a bit of an increase in the past 5-10 years. 
+
 ### Problem 4
 ```{r co2_PC for each region}
 gapminder %>% 
-  filter(!is.na(region)) %>% 
+  filter(!is.na(region), time == "2016") %>% 
   group_by(region) %>% 
   summarize(ave_co2_PC = mean(co2_PC, na.rm = TRUE))
 ```
+We see here that Europe and Asia have two of the highest average CO2 emissions per capita across all countries. Africa has the lowest average CO2 emissions per capita with Oceania and Americas round out the next two lowest respectively. 
 
 ### Problem 5
 ``` {r barplot for ave co2_PC by region}
@@ -113,14 +121,15 @@ gapminder %>%
 ```
 
 ### Problem 6
-```{r comparing countries ave_co2 in 2019 by continent}
-gapminder %>% 
-  filter(!is.na(region), time == "2016", !is.na(co2_PC)) %>% 
-  group_by(region) %>% 
-  reframe(region, name, co2_PC) %>% 
-  filter(rank(co2_PC) <= 3 | rank(desc(co2_PC)) <= 3) %>%
-  arrange(co2_PC)
+```{r comparing countries co2_PC in 2019 by continent}
   
+gapminder %>%
+  filter(!is.na(co2_PC), time == "2016", !is.na(name), !is.na(region)) %>%
+  group_by(region, name) %>%
+  arrange(region, co2_PC) %>%
+  group_by(region) %>%
+  filter(rank(co2_PC) <= 3 | rank(desc(co2_PC)) <= 3) %>% 
+  select(region, name, co2_PC)
 ```
 
 
@@ -135,6 +144,8 @@ GDP_PC_lifeExpectancy_1960 <- gapminder %>%
 GDP_PC_lifeExpectancy_1960
 ```
 
+Here we see a clear relationship between GDP per capita of a country and the life expectancy of the country, as with GDP per capita increasing, the life expectancy follows suit as countries with higher GDP per capita experience higher life expectancy. We also see a lot of countires from europe among those that have both high GDP per capita and life expectancy, with countries from the Americas being relatively high in both. We see that countries from Africa and Asia are relatively low in both GDP per capita and life expectancy. There doesn't appear to be too much a relationship regarding country size, it does seem like typically more medium to smaller size countries have both high GDP per captia and life expectancy with larger ones being the opposite. 
+
 ### Problem 2
 ``` {r same scatterplot using data from 2019}
 GDP_PC_lifeExpectancy_2019 <- gapminder %>% 
@@ -146,6 +157,7 @@ GDP_PC_lifeExpectancy_2019
 
 ### Problem 3
 
+When comparing these two graphs together we see that over time both GDP per capita has increased tremendously overall for countries with countries experiencing higher life expectancy as well. Between 1960 and 2019, Asian countries were able to significantly increase their life expectancy and increase GDP per capita as well. Overall, bigger countries have managed to do better over time as a lot of the bigger data points have moved up, increasing both GDP per capita and life expectancy. However we still see that countries from the Americas, Europe as well as Oceania have the highest GDP per capita and some of the highest life expectany out of all the regions, with African countries remaining pretty firmly among the bottom for both of these categories. 
 
 ### Problem 4
 ``` {r average life expectancy by region}
@@ -163,9 +175,11 @@ gapminder %>%
   filter(time == "1960" | time == "2019") %>% 
   group_by(region, time) %>%
   summarize(ave_lifeExpectancy = mean(lifeExpectancy)) %>% 
-  mutate(growth = ave_lifeExpectancy-lag(ave_lifeExpectancy)) %>% 
-  arrange(-growth)
+  mutate(growth_in_lE = ave_lifeExpectancy-lag(ave_lifeExpectancy)) %>% 
+  arrange(-growth_in_lE)
 ```
+
+Here we see that over time countries from Asia and Africa, experienced the greatest growth in life expectancy from 1960 to 2019. Countries from Europe experienced the lowest change in life expectancy over time with the Americas and Oceania region experiencing a healthy increase in life expectancy. 
 
 ### Problem 6
 ``` {r histograms}
@@ -174,6 +188,7 @@ gapminder %>%
   ggplot(aes(x = GDP_PC, fill = factor(time)))+
   geom_histogram(position = position_dodge())
 ```
+
 ### Problem 7
 ```{r ranking us in LE both 1960 and 2019}
 gapminder %>% 
@@ -185,9 +200,16 @@ gapminder %>%
   reframe(name, time, rank)
 ```
 ### Problem 8
-
-
-
-
-
-
+``` {r calculating relative rank divided countries}
+gapminder %>% 
+  filter(!is.na(lifeExpectancy), !is.na(name)) %>%
+  filter(time == "1960" | time == "2019") %>%
+  group_by(time) %>% 
+  mutate(rank = rank(desc(lifeExpectancy))) %>%
+  mutate(countries_by_year = n_distinct(name)) %>% 
+  mutate(rank_ratio = rank/countries_by_year) %>% 
+  reframe(name, time, rank_ratio) %>% 
+  filter(name == "United States of America")
+```
+## How long did this take?
+roughly 8-10 hours or so split across multiple days
